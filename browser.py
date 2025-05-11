@@ -9,11 +9,14 @@ class Browser:
         self.SCROLL_STEP = 100
 
         self.window = tkinter.Tk()
+
         self.canvas = tkinter.Canvas(self.window, width=self.WIDTH, height=self.HEIGHT)
-        self.canvas.pack()
+        self.canvas.pack(side="left")
+
         self.scroll = 1
         self.display_list = []
         self.text = ""
+        self.content_end = 0
 
         self.window.bind("<Down>", self.scrolldown)
         self.window.bind("<Up>", self.scrollup)
@@ -73,7 +76,7 @@ class Browser:
         self.WIDTH = e.width
         self.HEIGHT = e.height
         self.canvas.pack(fill='both', expand=1)
-        
+
         self.canvas.delete("all")
         self.layout(self.text)
         self.draw()
@@ -96,5 +99,6 @@ class Browser:
                 cursor_x = self.HSTEP
             else:    
                 cursor_x += self.HSTEP
+        self.content_end = cursor_y
         return self.display_list
 
