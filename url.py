@@ -4,10 +4,18 @@ from debug import showHeaders
 
 class URL:
     def __init__(self, url: str):
-        self.scheme, url = url.split("://", 1)
-        assert self.scheme in ["http", "https", "file", "view-source:http", "view-source:https"] # Make sure that the scheme is valid
-
         self.subscheme = ""
+        self.valid_scehemes = ["http", "https", "file", "view-source:http", "view-source:https"]
+
+        if "://" in url:
+            self.scheme, url = url.split("://", 1)
+            if self.scheme not in self.valid_scehemes:
+                self.scheme = "blank"
+                self.subscheme = "about"                
+        elif "://" not in url:
+            self.scheme = "blank"
+            self.subscheme = "about"
+        
 
         if self.scheme == "http" or self.scheme == "view-source:http":
             self.port = 80
@@ -23,6 +31,8 @@ class URL:
                 print("subscheme: " + self.subscheme)
         elif self.scheme == "file":
             self.port = 0
+        if self.scheme == "blank":
+            self.port = 0
 
         if "/" not in url:
             url = url + "/"
@@ -33,6 +43,8 @@ class URL:
         if ":" in self.host:
             self.host, port = self.host.split(":", 1)
             self.port = int(port)
+
+        self.content_length = ""
     
     def request(self):
 
@@ -40,6 +52,9 @@ class URL:
             file = open(self.path, 'r')
             content = file.read()
             file.close()
+            return content
+        elif self.scheme == "blank":
+            content = ""
             return content
         else:
             ctx = ssl.create_default_context()
@@ -89,6 +104,8 @@ class URL:
             # Make sure unusually encoded data isn't being sent
             assert "transfer-encoding" not in response_headers
             assert "content-encoding" not in response_headers
+
+            self.content_length = response_headers["content-length"]
 
             print(response_headers)
 

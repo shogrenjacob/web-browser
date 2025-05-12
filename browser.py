@@ -9,6 +9,7 @@ class Browser:
         self.SCROLL_STEP = 100
 
         self.window = tkinter.Tk()
+        self.window.title("Jacob's Web Browser :)")
 
         self.canvas = tkinter.Canvas(self.window, width=self.WIDTH, height=self.HEIGHT)
         self.canvas.pack(side="left")
@@ -27,7 +28,6 @@ class Browser:
 
         self.url = url
         body = url.request()
-
 
         if url.subscheme == "view-source":
             self.text = showHTML(body)
@@ -54,23 +54,28 @@ class Browser:
         self.draw()
 
     def scrollup(self, e):
-        self.canvas.delete("all")
         if self.scroll != 0:
+            self.canvas.delete("all")
             self.scroll -= self.SCROLL_STEP
-        self.draw()
+            self.draw()
 
     def scrollmouse(self, e):
-        if self.scroll > 0:
+        if self.scroll > 0 and self.scroll < self.content_end - self.HEIGHT:
             self.canvas.delete("all")
 
             self.scroll -= e.delta * (self.SCROLL_STEP / 2)
 
             if self.scroll <= 0:
                 self.scroll = 1
+            elif self.scroll >= self.content_end - self.HEIGHT:
+                self.scroll = self.content_end - self.HEIGHT - 1
 
             self.draw()
         elif self.scroll <= 0:
             self.scroll = 1
+        elif self.scroll >= self.content_end - self.HEIGHT:
+            self.scroll = self.content_end - self.HEIGHT - 1
+        print(self.scroll)
         
     def resize(self, e):
         self.WIDTH = e.width
@@ -100,5 +105,6 @@ class Browser:
             else:    
                 cursor_x += self.HSTEP
         self.content_end = cursor_y
+        print(self.content_end)
         return self.display_list
 
