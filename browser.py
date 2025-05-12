@@ -2,6 +2,8 @@ import tkinter
 from displayHtml import lex, showHTML
 from url import URL
 
+#TODO: Fix bug where, when displaying cached page, after resizing, the browser draws the most recently requested body
+
 class Browser:
     def __init__(self):
         self.WIDTH, self.HEIGHT = 800, 600
@@ -10,6 +12,32 @@ class Browser:
 
         self.window = tkinter.Tk()
         self.window.title("Jacob's Web Browser :)")
+
+        self.cache = {}
+
+        def search():
+            search_query = self.search_bar.get()
+
+            if search_query in self.cache:
+                self.canvas.delete("all")
+                self.scroll = 1
+                self.display_list = self.layout(self.cache[search_query])
+                self.draw()
+                print("Loaded from Cache")
+            else:
+                url = URL(search_query)
+                self.canvas.delete("all")
+                self.scroll = 1
+                print("loading from request")
+                self.load(url)
+        
+        self.top_frame = tkinter.Frame(self.window)
+        self.top_frame.pack(side=tkinter.TOP, fill=tkinter.X)
+
+        self.search_bar = tkinter.Entry(self.top_frame, width=100)
+        self.search_bar.pack(side="left", expand=True)
+        self.search_button = tkinter.Button(self.top_frame, text="search", command=search, bg="white")
+        self.search_button.pack(side="left", padx=(10,0), expand=True)
 
         self.canvas = tkinter.Canvas(self.window, width=self.WIDTH, height=self.HEIGHT)
         self.canvas.pack(side="left")
@@ -25,14 +53,20 @@ class Browser:
         self.window.bind("<Configure>", self.resize)
 
     def load(self, url: URL):
-
+        
         self.url = url
-        body = url.request()
+
+        if self.url not in self.cache:
+            body = url.request()
+        else:
+            body = self.cache[self.url]
 
         if url.subscheme == "view-source":
             self.text = showHTML(body)
         else:
             self.text = lex(body)
+        
+        self.cache[self.url.name] = self.text
 
         self.display_list = self.layout(self.text)
         self.draw()
@@ -49,12 +83,17 @@ class Browser:
 
     # e denotes the keyup event
     def scrolldown(self, e):
-        self.canvas.delete("all")
-        self.scroll += self.SCROLL_STEP
-        self.draw()
+        if self.scroll >= self.content_end - self.HEIGHT:
+            self.scroll = self.content_end - self.HEIGHT - 1
+        else:
+            self.canvas.delete("all")
+            self.scroll += self.SCROLL_STEP
+            self.draw()
 
     def scrollup(self, e):
-        if self.scroll != 0:
+        if self.scroll <= 0:
+            self.scroll = 1
+        else:
             self.canvas.delete("all")
             self.scroll -= self.SCROLL_STEP
             self.draw()
@@ -75,7 +114,6 @@ class Browser:
             self.scroll = 1
         elif self.scroll >= self.content_end - self.HEIGHT:
             self.scroll = self.content_end - self.HEIGHT - 1
-        print(self.scroll)
         
     def resize(self, e):
         self.WIDTH = e.width
@@ -105,6 +143,5 @@ class Browser:
             else:    
                 cursor_x += self.HSTEP
         self.content_end = cursor_y
-        print(self.content_end)
         return self.display_list
 

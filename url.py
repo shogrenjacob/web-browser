@@ -6,6 +6,7 @@ class URL:
     def __init__(self, url: str):
         self.subscheme = ""
         self.valid_scehemes = ["http", "https", "file", "view-source:http", "view-source:https"]
+        self.name = url
 
         if "://" in url:
             self.scheme, url = url.split("://", 1)
@@ -54,7 +55,7 @@ class URL:
             file.close()
             return content
         elif self.scheme == "blank":
-            content = ""
+            content = "about:blank"
             return content
         else:
             ctx = ssl.create_default_context()
