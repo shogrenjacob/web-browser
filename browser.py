@@ -1,6 +1,6 @@
 import tkinter
 import tkinter.font
-from displayHtml import lex, showHTML
+from displayHtml import lex, showHTML, Text, Tag
 from url import URL
 
 #TODO: Fix bug where, when displaying cached page, after resizing, the browser draws the most recently requested body
@@ -73,14 +73,14 @@ class Browser:
         self.draw()
     
     def draw(self):
-        for x, y, c in self.display_list:
+        for x, y, c, f in self.display_list:
 
             # Only create text that needs to be displayed, gets us closer to frame budget
             if y > self.scroll + self.HEIGHT:
                 continue
             if y + self.VSTEP < self.scroll:
                 continue
-            self.canvas.create_text(x, y - self.scroll, text=c)
+            self.canvas.create_text(x, y - self.scroll, text=c, font=f)
 
     # e denotes the keyup event
     def scrolldown(self, e):
@@ -126,26 +126,40 @@ class Browser:
         self.draw()
 
 
-    def layout(self, text: str):
+    def layout(self, tokens):
+        weight = "normal"
+        style = "roman"
         font = tkinter.font.Font()
         self.display_list = []
         cursor_x, cursor_y = self.HSTEP, self.VSTEP
 
-        for word in text.split():
-            w = font.measure(word)
-            if word == '\n':
-                cursor_y += self.VSTEP + 8
-                cursor_x = self.HSTEP
-                continue
+        for tok in tokens:
+            if isinstance(tok, Text):
+                for word in tok.text.split():
+                    font = tkinter.font.Font(size=16, weight=weight, slant=style)
 
-            self.display_list.append((cursor_x, cursor_y, word))
-            cursor_x += w + font.measure(" ")
-            
-            if cursor_x + w >= self.WIDTH - self.HSTEP:
-                cursor_y += font.metrics("linespace") * 1.25
-                cursor_x = self.HSTEP
-            else:    
-                cursor_x += self.HSTEP
+                    w = font.measure(word)
+                    if word == '\n':
+                        cursor_y += self.VSTEP + 8
+                        cursor_x = self.HSTEP
+                        continue
+
+                    self.display_list.append((cursor_x, cursor_y, word, font))
+                    cursor_x += w + font.measure(" ")
+                    
+                    if cursor_x + w >= self.WIDTH - self.HSTEP:
+                        cursor_y += font.metrics("linespace") * 1.25
+                        cursor_x = self.HSTEP
+                    else:    
+                        cursor_x += self.HSTEP
+            elif tok.tag == "i":
+                style = "italic"
+            elif tok.tag == "/i":
+                style = "roman"
+            elif tok.tag == "b":
+                weight = "bold"
+            elif tok.tag == "/b":
+                weight = "normal"
         self.content_end = cursor_y
         return self.display_list
     
