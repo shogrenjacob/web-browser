@@ -81,7 +81,7 @@ class Browser:
                 continue
             if y + self.VSTEP < self.scroll:
                 continue
-            self.canvas.create_text(x, y - self.scroll, text=c, font=f)
+            self.canvas.create_text(x, y - self.scroll, text=c, font=f, anchor="nw")
 
     # e denotes the keyup event
     def scrolldown(self, e):
@@ -118,13 +118,11 @@ class Browser:
             self.scroll = self.content_end - self.HEIGHT - 1
         
     def resize(self, e):
-        self.WIDTH = e.width
-        self.HEIGHT = e.height
+        WIDTH = e.width
+        HEIGHT = e.height
         self.canvas.pack(fill='both', expand=1)
 
         self.canvas.delete("all")
         Layout(self.text)
         self.draw()
-    
-# This is the layout branch
 
