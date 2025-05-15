@@ -126,20 +126,23 @@ class Browser:
         self.draw()
 
 
-    def layout(self, text):
+    def layout(self, text: str):
+        font = tkinter.font.Font()
         self.display_list = []
         cursor_x, cursor_y = self.HSTEP, self.VSTEP
 
-        for c in text:
-            if c == '\n':
+        for word in text.split():
+            w = font.measure(word)
+            if word == '\n':
                 cursor_y += self.VSTEP + 8
                 cursor_x = self.HSTEP
                 continue
 
-            self.display_list.append((cursor_x, cursor_y, c))
+            self.display_list.append((cursor_x, cursor_y, word))
+            cursor_x += w + font.measure(" ")
             
-            if cursor_x >= self.WIDTH - self.HSTEP:
-                cursor_y += self.VSTEP
+            if cursor_x + w >= self.WIDTH - self.HSTEP:
+                cursor_y += font.metrics("linespace") * 1.25
                 cursor_x = self.HSTEP
             else:    
                 cursor_x += self.HSTEP
