@@ -19,18 +19,18 @@ class Browser:
         def search():
             search_query = self.search_bar.get()
 
-            if search_query in self.cache:
-                self.canvas.delete("all")
-                self.scroll = 1
-                self.display_list = Layout(self.cache[search_query])
-                self.draw()
-                print("Loaded from Cache")
-            else:
-                url = URL(search_query)
-                self.canvas.delete("all")
-                self.scroll = 1
-                print("loading from request")
-                self.load(url)
+            # if search_query in self.cache:
+            #     self.canvas.delete("all")
+            #     self.scroll = 1
+            #     self.display_list = Layout(self.cache[search_query])
+            #     self.draw()
+            #     print("Loaded from Cache")
+
+            url = URL(search_query)
+            self.canvas.delete("all")
+            self.scroll = 1
+            print("loading from request")
+            self.load(url)
         
         self.top_frame = tkinter.Frame(self.window)
         self.top_frame.pack(side=tkinter.TOP, fill=tkinter.X)
