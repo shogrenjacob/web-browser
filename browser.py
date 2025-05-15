@@ -139,15 +139,15 @@ class Browser:
                     font = tkinter.font.Font(size=16, weight=weight, slant=style)
 
                     w = font.measure(word)
-                    if word == '\n':
-                        cursor_y += self.VSTEP + 8
-                        cursor_x = self.HSTEP
-                        continue
+                    # if word == '\n':
+                    #     cursor_y += self.VSTEP + 8
+                    #     cursor_x = self.HSTEP
+                    #     continue
 
                     self.display_list.append((cursor_x, cursor_y, word, font))
                     cursor_x += w + font.measure(" ")
                     
-                    if cursor_x + w >= self.WIDTH - self.HSTEP:
+                    if cursor_x >= self.WIDTH - self.HSTEP:
                         cursor_y += font.metrics("linespace") * 1.25
                         cursor_x = self.HSTEP
                     else:    
