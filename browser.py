@@ -74,6 +74,8 @@ class Browser:
         self.draw()
     
     def draw(self):
+        print("drawing new screen")
+
         for x, y, c, f in self.display_list:
 
             # Only create text that needs to be displayed, gets us closer to frame budget
@@ -85,6 +87,7 @@ class Browser:
 
     # e denotes the keyup event
     def scrolldown(self, e):
+        print(self.scroll)
         if self.scroll >= self.content_end - self.HEIGHT:
             self.scroll = self.content_end - self.HEIGHT - 1
         else:
@@ -93,6 +96,7 @@ class Browser:
             self.draw()
 
     def scrollup(self, e):
+        print(self.scroll)
         if self.scroll <= 0:
             self.scroll = 1
         else:
@@ -101,23 +105,26 @@ class Browser:
             self.draw()
 
     def scrollmouse(self, e):
-        if self.scroll > 0 and self.scroll < self.content_end - self.HEIGHT:
+        print(self.scroll)
+        if self.scroll > 0 and self.scroll < self.content_end - HEIGHT:
             self.canvas.delete("all")
 
+            print("if statement true")
             self.scroll -= e.delta * (self.SCROLL_STEP / 2)
 
             if self.scroll <= 0:
                 self.scroll = 1
-            elif self.scroll >= self.content_end - self.HEIGHT:
-                self.scroll = self.content_end - self.HEIGHT - 1
+            elif self.scroll >= self.content_end - HEIGHT:
+                self.scroll = self.content_end - HEIGHT - 1
 
             self.draw()
         elif self.scroll <= 0:
             self.scroll = 1
-        elif self.scroll >= self.content_end - self.HEIGHT:
-            self.scroll = self.content_end - self.HEIGHT - 1
+        elif self.scroll >= self.content_end - HEIGHT:
+            self.scroll = self.content_end - HEIGHT - 1
         
     def resize(self, e):
+        print("resize triggered")
         WIDTH = e.width
         HEIGHT = e.height
         self.canvas.pack(fill='both', expand=1)
