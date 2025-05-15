@@ -1,14 +1,15 @@
 import tkinter
 import tkinter.font
-from displayHtml import lex, showHTML, Text, Tag
+from displayHtml import lex, showHTML
 from url import URL
+from layout import HSTEP, VSTEP, WIDTH, HEIGHT, Layout
 
 #TODO: Fix bug where, when displaying cached page, after resizing, the browser draws the most recently requested body
 
 class Browser:
     def __init__(self):
-        self.WIDTH, self.HEIGHT = 800, 600
-        self.HSTEP, self.VSTEP = 13, 18
+        self.WIDTH, self.HEIGHT = WIDTH, HEIGHT
+        self.HSTEP, self.VSTEP = HSTEP, VSTEP
         self.SCROLL_STEP = 100
 
         self.window = tkinter.Tk()
@@ -22,7 +23,7 @@ class Browser:
             if search_query in self.cache:
                 self.canvas.delete("all")
                 self.scroll = 1
-                self.display_list = self.layout(self.cache[search_query])
+                self.display_list = Layout(self.cache[search_query])
                 self.draw()
                 print("Loaded from Cache")
             else:
@@ -63,13 +64,13 @@ class Browser:
             body = self.cache[self.url]
 
         if url.subscheme == "view-source":
-            self.text = showHTML(body)
+            tokens = showHTML(body)
         else:
-            self.text = lex(body)
+            tokens = lex(body)
         
         self.cache[self.url.name] = self.text
 
-        self.display_list = self.layout(self.text)
+        self.display_list = Layout(tokens).display_list
         self.draw()
     
     def draw(self):
@@ -122,46 +123,8 @@ class Browser:
         self.canvas.pack(fill='both', expand=1)
 
         self.canvas.delete("all")
-        self.layout(self.text)
+        Layout(self.text)
         self.draw()
-
-
-    def layout(self, tokens):
-        weight = "normal"
-        style = "roman"
-        font = tkinter.font.Font()
-        self.display_list = []
-        cursor_x, cursor_y = self.HSTEP, self.VSTEP
-
-        for tok in tokens:
-            if isinstance(tok, Text):
-                for word in tok.text.split():
-                    font = tkinter.font.Font(size=16, weight=weight, slant=style)
-
-                    w = font.measure(word)
-                    # if word == '\n':
-                    #     cursor_y += self.VSTEP + 8
-                    #     cursor_x = self.HSTEP
-                    #     continue
-
-                    self.display_list.append((cursor_x, cursor_y, word, font))
-                    cursor_x += w + font.measure(" ")
-                    
-                    if cursor_x >= self.WIDTH - self.HSTEP:
-                        cursor_y += font.metrics("linespace") * 1.25
-                        cursor_x = self.HSTEP
-                    else:    
-                        cursor_x += self.HSTEP
-            elif tok.tag == "i":
-                style = "italic"
-            elif tok.tag == "/i":
-                style = "roman"
-            elif tok.tag == "b":
-                weight = "bold"
-            elif tok.tag == "/b":
-                weight = "normal"
-        self.content_end = cursor_y
-        return self.display_list
     
 # This is the layout branch
 

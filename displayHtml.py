@@ -2,11 +2,11 @@ from url import URL
 
 class Text:
     def __init__(self, text):
-        self.text = text
+        self.text: str = text
 
 class Tag:
     def __init__(self, text):
-        self.tag = text
+        self.tag: str = text
 
 def lex(body):
     out = []
