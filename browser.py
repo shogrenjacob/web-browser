@@ -8,12 +8,11 @@ from layout import HSTEP, VSTEP, WIDTH, HEIGHT, Layout
 
 class Browser:
     def __init__(self):
-        self.WIDTH, self.HEIGHT = WIDTH, HEIGHT
-        self.HSTEP, self.VSTEP = HSTEP, VSTEP
         self.SCROLL_STEP = 100
 
         self.window = tkinter.Tk()
         self.window.title("Jacob's Web Browser :)")
+        self.tokens = ""
 
         self.cache = {}
 
@@ -41,7 +40,7 @@ class Browser:
         self.search_button = tkinter.Button(self.top_frame, text="search", command=search, bg="white")
         self.search_button.pack(side="left", padx=(10,0), expand=True)
 
-        self.canvas = tkinter.Canvas(self.window, width=self.WIDTH, height=self.HEIGHT)
+        self.canvas = tkinter.Canvas(self.window, width=WIDTH, height=HEIGHT)
         self.canvas.pack(side="left")
 
         self.scroll = 1
@@ -64,39 +63,37 @@ class Browser:
             body = self.cache[self.url]
 
         if url.subscheme == "view-source":
-            tokens = showHTML(body)
+            self.tokens = showHTML(body)
         else:
-            tokens = lex(body)
+            self.tokens = lex(body)
         
         self.cache[self.url.name] = self.text
 
-        self.display_list = Layout(tokens).display_list
+        layout = Layout(self.tokens)
+        self.display_list = layout.display_list
+        self.content_end = layout.cursor_y
         self.draw()
     
     def draw(self):
-        print("drawing new screen")
-
         for x, y, c, f in self.display_list:
 
             # Only create text that needs to be displayed, gets us closer to frame budget
-            if y > self.scroll + self.HEIGHT:
+            if y > self.scroll + HEIGHT:
                 continue
-            if y + self.VSTEP < self.scroll:
+            if y + VSTEP < self.scroll:
                 continue
             self.canvas.create_text(x, y - self.scroll, text=c, font=f, anchor="nw")
 
     # e denotes the keyup event
     def scrolldown(self, e):
-        print(self.scroll)
-        if self.scroll >= self.content_end - self.HEIGHT:
-            self.scroll = self.content_end - self.HEIGHT - 1
+        if self.scroll >= self.content_end - HEIGHT:
+            self.scroll = self.content_end - HEIGHT - 1
         else:
             self.canvas.delete("all")
             self.scroll += self.SCROLL_STEP
             self.draw()
 
     def scrollup(self, e):
-        print(self.scroll)
         if self.scroll <= 0:
             self.scroll = 1
         else:
@@ -105,11 +102,9 @@ class Browser:
             self.draw()
 
     def scrollmouse(self, e):
-        print(self.scroll)
         if self.scroll > 0 and self.scroll < self.content_end - HEIGHT:
             self.canvas.delete("all")
 
-            print("if statement true")
             self.scroll -= e.delta * (self.SCROLL_STEP / 2)
 
             if self.scroll <= 0:
@@ -124,12 +119,12 @@ class Browser:
             self.scroll = self.content_end - HEIGHT - 1
         
     def resize(self, e):
-        print("resize triggered")
+        global WIDTH, HEIGHT
         WIDTH = e.width
         HEIGHT = e.height
         self.canvas.pack(fill='both', expand=1)
 
         self.canvas.delete("all")
-        Layout(self.text)
+        Layout(self.tokens)
         self.draw()
 
