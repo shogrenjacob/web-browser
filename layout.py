@@ -1,6 +1,6 @@
 import tkinter
 import tkinter.font
-from displayHtml import Text, Tag
+from displayHtml import Text, Tag, displayEncoded
 
 HSTEP, VSTEP = 13, 18
 WIDTH, HEIGHT = 800, 600
@@ -25,8 +25,15 @@ class Layout:
     
     def token(self, tok):
         if isinstance(tok, Text):
-            for word in tok.text.split():
-                self.word(word)
+            if tok.text == "\n":
+                self.cursor_y += VSTEP
+            elif tok.text[0] == "&" and tok.text[1] != " ":
+                decodedChars = displayEncoded(tok.text)
+                for char in decodedChars:
+                    self.word(char)
+            else:
+                for word in tok.text.split():
+                    self.word(word)
         elif tok.tag == "i":
             self.style = "italic"
         elif tok.tag == "/i":

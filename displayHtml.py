@@ -2,10 +2,12 @@ from url import URL
 
 class Text:
     def __init__(self, text):
+        print("Text: " + text)
         self.text: str = text
 
 class Tag:
     def __init__(self, text):
+        print("Tag: " + text)
         self.tag: str = text
 
 def lex(body):
@@ -45,3 +47,24 @@ def load(url: URL):
     else:
         print("using lex")
         lex(body)
+
+def displayEncoded(tok: Text):
+    encodedList = tok.split(";")
+    decodedList = []
+
+    for item in encodedList:
+        cleanedItem = item.strip("&")
+
+        if cleanedItem == "lt":
+            decodedList.append("<")
+        elif cleanedItem == "gt":
+            decodedList.append(">")
+        elif cleanedItem == "amp":
+            decodedList.append("&")
+        elif cleanedItem == "quot":
+            decodedList.append('"')
+        elif cleanedItem == "apos":
+            decodedList.append("'")
+    
+
+    return decodedList
