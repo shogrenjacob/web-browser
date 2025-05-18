@@ -1,9 +1,7 @@
 import tkinter
 import tkinter.font
 from displayHtml import Text, Tag, displayEncoded
-
-HSTEP, VSTEP = 13, 18
-WIDTH, HEIGHT = 800, 600
+from globals import HSTEP, VSTEP, HEIGHT, WIDTH, FONTS
 
 class Layout:
     def __init__(self, tokens):
@@ -57,6 +55,7 @@ class Layout:
             self.cursor_y += VSTEP
 
     def word(self, word):
+        self.font = self.get_font(self.size, self.weight, self.style)
         w = self.font.measure(word)
                     
         if self.cursor_x + w >= WIDTH - HSTEP:
@@ -85,3 +84,13 @@ class Layout:
 
         self.cursor_x = HSTEP
         self.line = []
+
+    def get_font(self, size, weight, style):
+        key = (size, weight, style)
+
+        if key not in FONTS:
+            self.font = tkinter.font.Font(size=size, weight=weight, slant=style)
+            label = tkinter.Label(font=self.font)
+            FONTS[key] = (self.font, label)
+        
+        return FONTS[key][0]

@@ -2,7 +2,8 @@ import tkinter
 import tkinter.font
 from displayHtml import lex, showHTML
 from url import URL
-from layout import HSTEP, VSTEP, WIDTH, HEIGHT, Layout
+from globals import HSTEP, VSTEP, WIDTH, HEIGHT
+from layout import Layout
 
 #TODO: Fix bug where, when displaying cached page, after resizing, the browser draws the most recently requested body
 

@@ -1,4 +1,8 @@
+import tkinter
+import tkinter.font
+
 from url import URL
+from globals import FONTS
 
 class Text:
     def __init__(self, text):
