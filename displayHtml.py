@@ -6,12 +6,12 @@ from globals import FONTS
 
 class Text:
     def __init__(self, text):
-        print("Text: " + text)
+        
         self.text: str = text
 
 class Tag:
     def __init__(self, text):
-        print("Tag: " + text)
+        
         self.tag: str = text
 
 def lex(body):
