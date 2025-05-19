@@ -1,6 +1,6 @@
 import tkinter
 import tkinter.font
-from displayHtml import lex, showHTML
+from displayHtml import HtmlParser, showHTML
 from url import URL
 from globals import HSTEP, VSTEP, WIDTH, HEIGHT
 from layout import Layout
@@ -66,7 +66,7 @@ class Browser:
         if url.subscheme == "view-source":
             self.tokens = showHTML(body)
         else:
-            self.tokens = lex(body)
+            self.tokens = HtmlParser(body)
         
         self.cache[self.url.name] = self.text
 

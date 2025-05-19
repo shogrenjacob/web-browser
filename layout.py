@@ -1,6 +1,7 @@
 import tkinter
 import tkinter.font
-from displayHtml import Text, Tag, displayEncoded
+from displayHtml import displayEncoded
+from HtmlParser import Text, Element
 from globals import HSTEP, VSTEP, HEIGHT, WIDTH, FONTS
 
 class Layout:
