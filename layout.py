@@ -5,7 +5,7 @@ from HtmlParser import Text, Element
 from globals import HSTEP, VSTEP, HEIGHT, WIDTH, FONTS
 
 class Layout:
-    def __init__(self, tokens):
+    def __init__(self, tree):
         self.display_list = []
 
         self.cursor_x = HSTEP
@@ -17,10 +17,29 @@ class Layout:
 
         self.font = tkinter.font.Font(size=self.size, weight=self.weight, slant=self.style)
 
-        for tok in tokens:
-            self.token(tok)
+        self.recurse(tree)
 
         self.flush()
+    
+    def open_tag(self, tag):
+        if tag == "i":
+            self.style = "italic"
+        
+    def close_tag(self, tag):
+        if tag == "i":
+            self.style = "roman"
+
+    # Traverse the node tree
+    def recurse(self, tree):
+        if isinstance(tree, Text):
+            for word in tree.text.split():
+                self.word(word)
+        else:
+            self.open_tag(tree.tag)
+            for child in tree.children:
+                self.recurse(child)
+            
+            self.close_tag(tree.tag)
     
     def token(self, tok):
         if isinstance(tok, Text):

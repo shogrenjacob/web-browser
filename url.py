@@ -5,7 +5,7 @@ from debug import showHeaders
 class URL:
     def __init__(self, url: str):
         self.subscheme = ""
-        self.valid_scehemes = ["http", "https", "file", "view-source:http", "view-source:https"]
+        self.valid_scehemes = ["http", "https", "file", "view-source:http", "view-source:https", "view-source:file"]
         self.name = url
 
         if "://" in url:
@@ -30,8 +30,12 @@ class URL:
                 self.subscheme, self.scheme = self.scheme.split(":", 1)
                 print("scheme: " + self.scheme)
                 print("subscheme: " + self.subscheme)
-        elif self.scheme == "file":
+        elif self.scheme == "file" or self.scheme == "view-source:file":
             self.port = 0
+            if self.scheme == "view-source:file":
+                self.subscheme, self.scheme = self.scheme.split(":", 1)
+                print("scheme: " + self.scheme)
+                print("subscheme: " + self.subscheme)
         if self.scheme == "blank":
             self.port = 0
 

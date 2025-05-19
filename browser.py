@@ -1,6 +1,7 @@
 import tkinter
 import tkinter.font
 from displayHtml import HtmlParser, showHTML
+from debug import print_tree
 from url import URL
 from globals import HSTEP, VSTEP, WIDTH, HEIGHT
 from layout import Layout
@@ -13,7 +14,6 @@ class Browser:
 
         self.window = tkinter.Tk()
         self.window.title("Jacob's Web Browser :)")
-        self.tokens = ""
 
         self.cache = {}
 
@@ -64,13 +64,14 @@ class Browser:
             body = self.cache[self.url]
 
         if url.subscheme == "view-source":
-            self.tokens = showHTML(body)
+            self.nodes = HtmlParser(body).parse()
+            print_tree(self.nodes)
         else:
-            self.tokens = HtmlParser(body)
+            self.nodes = HtmlParser(body).parse()
         
         self.cache[self.url.name] = self.text
 
-        layout = Layout(self.tokens)
+        layout = Layout(self.nodes)
         self.display_list = layout.display_list
         self.content_end = layout.cursor_y
         self.draw()
@@ -125,7 +126,8 @@ class Browser:
         HEIGHT = e.height
         self.canvas.pack(fill='both', expand=1)
 
-        self.canvas.delete("all")
-        Layout(self.tokens)
-        self.draw()
+        if self.content_end != 0:
+            self.canvas.delete("all")
+            Layout(self.nodes)
+            self.draw()
 
