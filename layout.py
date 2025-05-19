@@ -1,6 +1,7 @@
 import tkinter
 import tkinter.font
-from displayHtml import displayEncoded
+import html
+
 from HtmlParser import Text, Element
 from globals import HSTEP, VSTEP, HEIGHT, WIDTH, FONTS
 
@@ -24,10 +25,33 @@ class Layout:
     def open_tag(self, tag):
         if tag == "i":
             self.style = "italic"
+        if tag == "b":
+            self.weight = "bold"
+        if tag == "small":
+            self.size = 12
+        if tag == "big":
+            self.size = 20
+        if tag == "p":
+            self.flush()
+            self.cursor_y += VSTEP * 2
+        if tag == "br":
+            self.flush()
+            self.cursor_y += VSTEP * 5
+        if tag == "li":
+            self.flush()
+            self.cursor_x += HSTEP * 2
+        if tag == "ul" or tag == "ol":
+            self.flush()
         
-    def close_tag(self, tag):
+    def close_tag(self, tag: str):
         if tag == "i":
             self.style = "roman"
+        if tag == "b":
+            self.weight = "normal"
+        if tag == "small" or tag == "big":
+            self.size = 16
+
+
 
     # Traverse the node tree
     def recurse(self, tree):
@@ -40,41 +64,10 @@ class Layout:
                 self.recurse(child)
             
             self.close_tag(tree.tag)
-    
-    def token(self, tok):
-        if isinstance(tok, Text):
-            if tok.text == "\n":
-                self.cursor_y += VSTEP
-            elif tok.text[0] == "&" and tok.text[1] != " ":
-                decodedChars = displayEncoded(tok.text)
-                for char in decodedChars:
-                    self.word(char)
-            else:
-                for word in tok.text.split():
-                    self.word(word)
-        elif tok.tag == "i":
-            self.style = "italic"
-        elif tok.tag == "/i":
-            self.style = "roman"
-        elif tok.tag == "b":
-            self.weight = "bold"
-        elif tok.tag == "/b":
-            self.weight = "normal"
-        elif tok.tag == "small":
-            self.size -= 2
-        elif tok.tag == "/small":
-            self.size += 2
-        elif tok.tag == "big":
-            self.size += 4
-        elif tok.tag == "/big":
-            self.size -= 4
-        elif tok.tag == "br":
-            self.flush()
-        elif tok.tag == "/p":
-            self.flush()
-            self.cursor_y += VSTEP
 
     def word(self, word):
+        word = html.unescape(word)
+
         self.font = self.get_font(self.size, self.weight, self.style)
         w = self.font.measure(word)
                     
