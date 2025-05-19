@@ -41,8 +41,8 @@ class Browser:
         self.search_button = tkinter.Button(self.top_frame, text="search", command=search, bg="white")
         self.search_button.pack(side="left", padx=(10,0), expand=True)
 
-        self.canvas = tkinter.Canvas(self.window, width=WIDTH, height=HEIGHT)
-        self.canvas.pack(side="left")
+        self.canvas = tkinter.Canvas(self.window, width=WIDTH, height=HEIGHT, bd=2, relief="solid")
+        self.canvas.pack(side="top")
 
         self.scroll = 1
         self.display_list = []
@@ -121,7 +121,6 @@ class Browser:
             self.scroll = self.content_end - HEIGHT - 1
         
     def resize(self, e):
-        global WIDTH, HEIGHT
         WIDTH = e.width
         HEIGHT = e.height
         self.canvas.pack(fill='both', expand=1)

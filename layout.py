@@ -71,7 +71,7 @@ class Layout:
         self.font = self.get_font(self.size, self.weight, self.style)
         w = self.font.measure(word)
                     
-        if self.cursor_x + w >= WIDTH - HSTEP:
+        if self.cursor_x >= WIDTH: # removed + w from self.cursor_x +w and - HSTEP from WIDTH - HSTEP
             self.flush()
             self.cursor_y += self.font.metrics("linespace") * 1.25
             self.cursor_x = HSTEP
