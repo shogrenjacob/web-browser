@@ -3,7 +3,7 @@ import tkinter.font
 import html
 
 from HtmlParser import Text, Element
-from globals import HSTEP, VSTEP, HEIGHT, WIDTH, FONTS, CURSOR_X, CURSOR_Y
+from globals import HSTEP, VSTEP, HEIGHT, WIDTH, FONTS, CURSOR_X, CURSOR_Y, BLOCK_ELEMENTS
 
 class BlockLayout:
     def __init__(self, node, parent, previous):
@@ -14,17 +14,29 @@ class BlockLayout:
         
 
     def layout(self):
-        self.weight = "normal"
-        self.style = "roman"
-        self.size = 16
-        self.line = []
+        mode = self.layout_mode()
 
-        self.font = tkinter.font.Font(size=self.size, weight=self.weight, slant=self.style)
+        if mode == "block":
+            previous = None
 
-        self.recurse(self.node)
+            for child in self.node.children:
+                next = BlockLayout(child, self, previous)
+                self.children.append(next)
+                previous = next
+        else:
+            self.cursor_x = 0
+            self.cursor_y = 0
+            self.weight = "normal"
+            self.style = "roman"
+            self.size = 12
 
-        self.flush()
-    
+            self.line = []
+            self.recurse(self.node)
+            self.flush()
+
+        for child in self.children:
+            child.layout()
+
     def open_tag(self, tag):
         global CURSOR_X, CURSOR_Y
         if tag == "i":
@@ -113,3 +125,23 @@ class BlockLayout:
             FONTS[key] = (self.font, label)
         
         return FONTS[key][0]
+
+    def layout_intermediate(self):
+        previous = None
+
+        for child in self.node.children:
+            next = BlockLayout(child, self, previous)
+            self.children.append(next)
+            previous = next
+
+    # Determine whether to use layout_intermediate or recurse, use layout_i if the node is block content, recurse if its text content
+    def layout_mode(self):
+        if isinstance(self.node, Text):
+            return "inline"
+        # Error case where a block element also contains a inline element within (ex: <p> this is <b>bold</b></p>)
+        elif any([isinstance(child, Element) and child.tag in BLOCK_ELEMENTS for child in self.node.children]):
+            return "block"
+        elif self.node.children:
+            return "inline"
+        else:
+            return "block"
