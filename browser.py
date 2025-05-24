@@ -121,6 +121,7 @@ class Browser:
             self.scroll = self.content_end - HEIGHT - 1
         
     def resize(self, e):
+        global WIDTH, HEIGHT
         WIDTH = e.width
         HEIGHT = e.height
         self.canvas.pack(fill='both', expand=1)
