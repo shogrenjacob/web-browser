@@ -3,7 +3,7 @@ import tkinter.font
 import html
 
 from HtmlParser import Text, Element
-from globals import HSTEP, VSTEP, HEIGHT, WIDTH, FONTS, CURSOR_X, CURSOR_Y, BLOCK_ELEMENTS
+from globals import HSTEP, VSTEP, HEIGHT, WIDTH, FONTS, BLOCK_ELEMENTS
 
 class BlockLayout:
     def __init__(self, node, parent, previous):
@@ -11,9 +11,20 @@ class BlockLayout:
         self.parent = None
         self.previous = previous
         self.children = []
+        self.x = None
+        self.y = None
+        self.width = None
+        self.height = None
         
 
     def layout(self):
+        if self.previous:
+            self.y = self.previous.y + self.previous.height
+        else:
+            self.y = self.parent.y
+
+        self.x = self.parent.x
+        self.width = self.parent.width
         mode = self.layout_mode()
 
         if mode == "block":
@@ -37,8 +48,12 @@ class BlockLayout:
         for child in self.children:
             child.layout()
 
+        if mode == "block":
+            self.height = sum([child.height for child in self.children]) # Gets the height of a parent element, needs to be at least sum of all children
+        else:
+            self.height = self.cursor_y
+
     def open_tag(self, tag):
-        global CURSOR_X, CURSOR_Y
         if tag == "i":
             self.style = "italic"
         if tag == "b":
@@ -49,13 +64,13 @@ class BlockLayout:
             self.size = 20
         if tag == "p":
             self.flush()
-            CURSOR_Y += VSTEP * 2
+            self.cursor_y += VSTEP * 2
         if tag == "br":
             self.flush()
-            CURSOR_Y += VSTEP * 5
+            self.cursor_y += VSTEP * 5
         if tag == "li":
             self.flush()
-            CURSOR_X += HSTEP * 2
+            self.cursor_x += HSTEP * 2
         if tag == "ul" or tag == "ol":
             self.flush()
         
@@ -82,38 +97,38 @@ class BlockLayout:
             self.close_tag(tree.tag)
 
     def word(self, word):
-        global CURSOR_Y, CURSOR_X
         word = html.unescape(word)
 
         self.font = self.get_font(self.size, self.weight, self.style)
         w = self.font.measure(word)
                     
-        if CURSOR_X >= WIDTH: # removed + w from CURSOR_X +w and - HSTEP from WIDTH - HSTEP
+        if self.cursor_x + w > self.width:
             self.flush()
-            CURSOR_Y += self.font.metrics("linespace") * 1.25
-            CURSOR_X = HSTEP
+            self.cursor_y += self.font.metrics("linespace") * 1.25
+            self.cursor_x = HSTEP
 
-        self.line.append((CURSOR_X, word, self.font))
-        CURSOR_X += w + self.font.measure(" ")
+        self.line.append((self.cursor_x, word, self.font))
+        self.cursor_x += w + self.font.measure(" ")
         
     
     def flush(self):
-        global CURSOR_X, CURSOR_Y
         if not self.line: return
 
         metrics = [self.font.metrics() for x, word, font in self.line]
         max_ascent = max([metric["ascent"] for metric in metrics])
 
-        baseline = CURSOR_Y + 1.25 * max_ascent
+        baseline = self.cursor_y + 1.25 * max_ascent
 
-        for x, word, font in self.line:
-            y = baseline - self.font.metrics("ascent")
+        for rel_x, word, font in self.line:
+            x = self.x + rel_x
+            y = self.y + baseline - self.font.metrics("ascent")
             self.display_list.append((x, y, word, font))
 
         max_descent = max([metric["descent"] for metric in metrics])
-        CURSOR_Y = baseline + 1.25 * max_descent
+        self.cursor_y = baseline + 1.25 * max_descent
 
-        CURSOR_X = HSTEP
+        self.cursor_x = HSTEP
+        self.cursor_x = 0 # May need to replace above line with this
         self.line = []
 
     def get_font(self, size, weight, style):
