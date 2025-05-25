@@ -8,23 +8,25 @@ from globals import HSTEP, VSTEP, HEIGHT, WIDTH, FONTS, BLOCK_ELEMENTS
 class BlockLayout:
     def __init__(self, node, parent, previous):
         self.node = node
-        self.parent = None
+        self.parent = parent
         self.previous = previous
         self.children = []
         self.x = None
         self.y = None
         self.width = None
         self.height = None
+        self.display_list = []
         
 
     def layout(self):
+        self.x = self.parent.x
+        self.width = self.parent.width
+
         if self.previous:
             self.y = self.previous.y + self.previous.height
         else:
             self.y = self.parent.y
 
-        self.x = self.parent.x
-        self.width = self.parent.width
         mode = self.layout_mode()
 
         if mode == "block":
@@ -160,3 +162,12 @@ class BlockLayout:
             return "inline"
         else:
             return "block"
+    
+    def paint(self):
+        return self.display_list
+
+def paint_tree(layout_object, display_list):
+    display_list.extend(layout_object.paint())
+
+    for child in layout_object.children:
+        paint_tree(child, display_list)

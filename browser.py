@@ -5,6 +5,8 @@ from debug import print_tree
 from url import URL
 from globals import HSTEP, VSTEP, WIDTH, HEIGHT
 from layout import Layout
+from BlockLayout import paint_tree, BlockLayout
+from DocumentLayout import DocumentLayout
 
 #TODO: Fix bug where, when displaying cached page, after resizing, the browser draws the most recently requested body
 
@@ -58,22 +60,27 @@ class Browser:
         
         self.url = url
 
+        # Add to cache if new request
         if self.url not in self.cache:
             body = url.request()
         else:
             body = self.cache[self.url]
 
+        # Show html instead of content if view-source is requested
         if url.subscheme == "view-source":
             self.nodes = HtmlParser(body).parse()
             print_tree(self.nodes)
         else:
             self.nodes = HtmlParser(body).parse()
         
+        # Add new request to cache
         self.cache[self.url.name] = self.text
 
-        layout = Layout(self.nodes)
-        self.display_list = layout.display_list
-        self.content_end = layout.cursor_y
+        self.document = DocumentLayout(self.nodes)
+        self.document.layout()
+        self.display_list = []
+        paint_tree(self.document, self.display_list)
+        self.content_end = self.document.height
         self.draw()
     
     def draw(self):
@@ -128,6 +135,12 @@ class Browser:
 
         if self.content_end != 0:
             self.canvas.delete("all")
-            Layout(self.nodes)
+
+            self.document = DocumentLayout(self.nodes)
+            self.document.layout()
+            self.display_list = []
+            paint_tree(self.document, self.display_list)
+            self.content_end = self.document.height
+            
             self.draw()
 
