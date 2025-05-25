@@ -4,6 +4,7 @@ import html
 
 from HtmlParser import Text, Element
 from globals import HSTEP, VSTEP, HEIGHT, WIDTH, FONTS, BLOCK_ELEMENTS
+from DrawItems import DrawRect, DrawText
 
 class BlockLayout:
     def __init__(self, node, parent, previous):
@@ -164,7 +165,15 @@ class BlockLayout:
             return "block"
     
     def paint(self):
-        return self.display_list
+        cmds = []
+        if isinstance(self.node, Element) and self.node.tag == "pre":
+            x2, y2 = self.x + self.width, self.y + self.height
+            rect = DrawRect(self.x, self.y, x2, y2, "gray")
+            cmds.append(rect)
+        if self.layout_mode() == "inline":
+            for x, y, word, font in self.display_list:
+                cmds.append(DrawText(x, y, word, font))
+        return cmds
 
 def paint_tree(layout_object, display_list):
     display_list.extend(layout_object.paint())

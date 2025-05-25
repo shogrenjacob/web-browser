@@ -84,14 +84,12 @@ class Browser:
         self.draw()
     
     def draw(self):
-        for x, y, c, f in self.display_list:
+        self.canvas.delete("all")
 
-            # Only create text that needs to be displayed, gets us closer to frame budget
-            if y > self.scroll + HEIGHT:
-                continue
-            if y + VSTEP < self.scroll:
-                continue
-            self.canvas.create_text(x, y - self.scroll, text=c, font=f, anchor="nw")
+        for cmd in self.display_list:
+            if cmd.top > self.scroll + HEIGHT: continue
+            if cmd.bottom < self.scroll: continue
+            cmd.execute(self.scroll, self.canvas)
 
     # e denotes the keyup event
     def scrolldown(self, e):
