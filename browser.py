@@ -22,7 +22,8 @@ class Browser:
 
         self.cache = {}
 
-        self.page_stack = deque()
+        self.prev_page_stack = deque()
+        self.next_page_stack = deque()
 
         def search():
             search_query = self.search_bar.get()
@@ -40,24 +41,40 @@ class Browser:
             print("loading from request")
 
             self.current_page = url
-            self.page_stack.append(url)
+            self.prev_page_stack.append(url)
             self.load(url)
         
         def return_to_prev():
-            print(f"Page stack: {self.page_stack}")
-            prev_page = self.page_stack.pop()
+            self.next_page_stack.append(self.current_page)
 
-            if prev_page == self.current_page:
-                prev_page = self.page_stack.pop()
+            if len(self.prev_page_stack) != 0:
+                print(f"Page stack: {self.prev_page_stack}")
+                prev_page = self.prev_page_stack.pop()
 
-            print(f"Prev Page: {prev_page}")
-            self.load(prev_page)
+                if prev_page == self.current_page:
+                    prev_page = self.prev_page_stack.pop()
+
+                print(f"Prev Page: {prev_page}")
+                self.current_page = prev_page
+                self.load(prev_page)
+        
+        def to_next_page():
+            if len(self.next_page_stack) != 0:
+                self.prev_page_stack.append(self.current_page)
+                next_page = self.next_page_stack.pop()
+
+                self.current_page = next_page
+                self.load(next_page)
+            else:
+                print("next page stack empty")
         
         self.top_frame = tkinter.Frame(self.window)
         self.top_frame.pack(side=tkinter.TOP, fill=tkinter.X)
 
         self.return_button = tkinter.Button(self.top_frame, text="<-", command=return_to_prev, bg="white")
         self.return_button.pack(side="left", expand=True)
+        self.next_button = tkinter.Button(self.top_frame, text="->", command=to_next_page, bg="white")
+        self.next_button.pack(side="left", expand=True)
         self.search_bar = tkinter.Entry(self.top_frame, width=100)
         self.search_bar.pack(side="left", expand=True)
         self.search_button = tkinter.Button(self.top_frame, text="search", command=search, bg="white")
