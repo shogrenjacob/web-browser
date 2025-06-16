@@ -1,5 +1,8 @@
 import tkinter
 import tkinter.font
+
+from collections import deque
+
 from displayHtml import HtmlParser, showHTML
 from debug import print_tree
 from url import URL
@@ -19,6 +22,8 @@ class Browser:
 
         self.cache = {}
 
+        self.page_stack = deque()
+
         def search():
             search_query = self.search_bar.get()
 
@@ -33,11 +38,26 @@ class Browser:
             self.canvas.delete("all")
             self.scroll = 1
             print("loading from request")
+
+            self.current_page = url
+            self.page_stack.append(url)
             self.load(url)
+        
+        def return_to_prev():
+            print(f"Page stack: {self.page_stack}")
+            prev_page = self.page_stack.pop()
+
+            if prev_page == self.current_page:
+                prev_page = self.page_stack.pop()
+
+            print(f"Prev Page: {prev_page}")
+            self.load(prev_page)
         
         self.top_frame = tkinter.Frame(self.window)
         self.top_frame.pack(side=tkinter.TOP, fill=tkinter.X)
 
+        self.return_button = tkinter.Button(self.top_frame, text="<-", command=return_to_prev, bg="white")
+        self.return_button.pack(side="left", expand=True)
         self.search_bar = tkinter.Entry(self.top_frame, width=100)
         self.search_bar.pack(side="left", expand=True)
         self.search_button = tkinter.Button(self.top_frame, text="search", command=search, bg="white")
